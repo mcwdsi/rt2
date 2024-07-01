@@ -5,6 +5,7 @@ class Concept:
 		self.code = code
 		self.cs_rui = cs_rui
 		self.name = any_name
+	#TODO Add a __str__
 
 
 class Attribute:
@@ -14,3 +15,5 @@ class Attribute:
 		self.r = r 
 		self.cs_rui = cs_rui
 		self.name = any_name
+
+	#TODO Add a __str__

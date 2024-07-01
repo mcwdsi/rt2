@@ -5,6 +5,7 @@ import enum
 
 class Rui:
 	"""Referent Unique Identifier
+	A unique identifier for referent tracking
 
 	Attributes:
 	status -- the current status of the Rui
@@ -25,44 +26,41 @@ class Rui:
 	def __str__(self):
 		return str(self._uuid)
 
-
-# class TempRefStatus(enum.Enum):
-# 	 = 'U'
-# 	 = 'C'
-# 	 = ''
-
+#TODO Figure out if the option should be a uuid or an RUI. Probably RUI
 class TempRef:
 	"""Temporal Reference
-	
+	A tuple component that contains is either a calendar date or a unique identifier that represents a instance or interval of time
+
 	Attributes:
-	cal -- 
-	uuid -- 
+	cal -- o
+	uuid -- The unique identifier for the tempref
 	"""
 
 	def __init__(self, tr, ref_type: str=''):
+		self.uuid = None
+		self.cal = None
 		if (isinstance(tr, datetime)):
 			if tr.tzinfo != timezone.utc:
 				tr = tr.astimezone(timezone.utc)
 			self.cal = tr
-			self.uuid = None
 		elif (isinstance(tr, UUID)):
 			self.uuid = tr
-			self.cal = None
-		elif (tr == None):
+		else:
 			if ref_type == 'U':
 				self.uuid = uuid7()
-				self.cal = None
 			elif ref_type == 'C':
-				self.uuid = None
 				self.cal = datetime.now(timezone.utc)
 			else:
 				logging.error("don't understand " + ref_type)
 				raise Exception(ref_type + " is not a valid option")
-		else:
-			raise Exception("temporal reference must be datatime or uuid")
 
 	def isCalendar(self):
 		return self.cal
 
 	def isUuid(self):
 		return self.uuid
+	
+	def __str__(self):
+		if self.isCalendar():
+			return str(self.cal)
+		return str(self.uuid)
