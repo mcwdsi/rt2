@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import enum
 
-from ids_codes.Rui import Rui, TempRef
+from .ids_codes.Rui import Rui, TempRef
 from abc import ABC, abstractmethod
 
 """Enum for when the string representation of an enum instance is the value"""

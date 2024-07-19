@@ -22,5 +22,5 @@ requires-python = ">=3.11"
 
 [tool.pytest.ini_options]
 pythonpath = [
-  "src/rt_core_v2"
+  "src/rt_core_v2", "src/rt_core_v2/ids_codes"
 ]
