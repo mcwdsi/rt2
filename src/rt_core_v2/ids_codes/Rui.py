@@ -22,9 +22,6 @@ class Rui:
 	def __str__(self):
 		return str(self._uuid)
 	
-	def toJSON(self):
-		return str(self._uuid)
-	
 	def __eq__(self, other):
 		if not isinstance(other, type(self)):
 			return False
@@ -44,9 +41,6 @@ class TempRef:
 		self.ref = tr if tr else Rui()
 	
 	def __str__(self):
-		return str(self.ref)
-	
-	def toJSON(self):
 		return str(self.ref)
 	
 	def __eq__(self, other):

@@ -7,10 +7,29 @@ from rt_core_v2.rttuple import RtTuple, TupleComponents, TupleType, type_to_clas
 from rt_core_v2.ids_codes.Rui import Rui, TempRef
 from rt_core_v2.metadata_accessory import TupleEventType, RtChangeReason
 
-def rttuple_to_json(input_rttuples):
-    """Converts either a list or an RtTuple to a json object"""
-    return json.dumps(input_rttuples.get_str_attributes(), default=lambda o: o.toJSON() if hasattr(o, 'toJSON') else str(o))
 
+
+class RtTupleJSONEncoder(json.JSONEncoder):
+    """Converts contents of RtTuples into a json representation"""
+    encoded_classes = {Rui, TempRef, PorType, RuiStatus, TupleType}
+
+    def __init__(self, *args, **kwargs):
+        json.JSONEncoder.__init__(self, *args, **kwargs)
+    
+    def default(self, obj):
+        """If the object is an instance of an entry in encoded_classes then convert it to a string for the JSON"""
+        if any(isinstance(obj, cls) for cls in self.encoded_classes):
+            return str(obj)
+        else:
+            super().default(obj)
+
+
+def rttuple_to_json(input_rttuple: RtTuple):
+    """Convert an RtTuple to a json object"""
+    # return json.dumps(input_rttuple.get_attributes(), default=lambda o: o.toJSON() if hasattr(o, 'toJSON') else str(o))
+    return json.dumps(input_rttuple.get_attributes(), cls=RtTupleJSONEncoder)
+
+#TODO Swap this from an enum to a dictionary
 class RtTupleFormat(enum.Enum):
     """Enum mapping formats to functions to convert RtTuples into the format"""
     json_format = rttuple_to_json
@@ -51,7 +70,6 @@ json_entry_converter = {
     TupleComponents.ruin: JsonEntryConverter.str_to_rui,
     TupleComponents.ruir: JsonEntryConverter.str_to_rui,
     TupleComponents.ruics: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruins: JsonEntryConverter.str_to_rui,
     TupleComponents.ruidt: JsonEntryConverter.str_to_rui,
     TupleComponents.t: JsonEntryConverter.str_to_temp,
     TupleComponents.td: JsonEntryConverter.str_to_temp,
@@ -88,3 +106,4 @@ def json_to_rttuple(tuple_json) -> RtTuple:
     tuple_class = type_to_class[tuple_dict[TupleComponents.type.value]]
     del tuple_dict[TupleComponents.type.value]
     return tuple_class(**tuple_dict)
+
