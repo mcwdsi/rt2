@@ -16,7 +16,7 @@ from rt_core_v2.rttuple import (
 )
 from rt_core_v2.formatter import format_rttuple, json_to_rttuple
 from rt_core_v2.metadata import TupleEventType, RtChangeReason
-
+import base64
 
 def ordered(obj):
     if isinstance(obj, dict):
@@ -49,7 +49,8 @@ polarity = False
 relation = Rui()
 p_list = [ruid, ruin]
 code = "code insert"
-data = "data insert"
+data_original = "data insert"
+data = data_original.encode('utf-8')
 
 """Converts the list into a json appropriate representation"""
 
@@ -205,8 +206,7 @@ def test_ntoc_json():
 def test_ntode_json():
     ntode = NtoDETuple(rui=rui, polarity=polarity, ruin=ruin, data=data, ruidt=ruidt)
     formatted_ntode = format_rttuple(ntode)
-    expected_ntode = f'{{"rui": "{rui}", "tuple_type": "{ntode.tuple_type}", "polarity": {str(polarity).lower()}, "ruin": "{ruin}", "ruidt": "{ruidt}", "data": "{data}"}}'
-
+    expected_ntode = f'{{"rui": "{rui}", "tuple_type": "{ntode.tuple_type}", "polarity": {str(polarity).lower()}, "ruin": "{ruin}", "ruidt": "{ruidt}", "data": "{base64.b64encode(data).decode('utf-8')}"}}'
     print("Ntoctuple Expected:  \n" + expected_ntode)
     print("Ntoctuple Processed:  \n" + formatted_ntode)
 

@@ -3,6 +3,7 @@ import enum
 from io import StringIO
 from uuid import UUID
 from datetime import datetime
+import base64
 
 from rt_core_v2.rttuple import (
     RtTuple,
@@ -33,6 +34,9 @@ class RtTupleJSONEncoder(json.JSONEncoder):
             return str(obj)
         if any(isinstance(obj, cls) for cls in self.val_classes):
             return obj.value
+        if isinstance(obj, bytes):
+            return base64.b64encode(obj).decode('utf-8')
+
         else:
             super().default(obj)
 
@@ -103,6 +107,10 @@ class JsonEntryConverter:
     @staticmethod
     def str_to_relation(relation_str: str) -> Relationship:
         return Relationship(relation_str)
+    
+    @staticmethod
+    def str_to_bytes(x: str):
+        return base64.b64decode(x)
 
 
 
@@ -130,9 +138,8 @@ json_entry_converter = {
     TupleComponents.C: lambda x: float(x),
     TupleComponents.polarity: lambda x: bool(x),
     TupleComponents.r: JsonEntryConverter.str_to_rui,
-    # TODO Figure out the types of code and data
     TupleComponents.code: JsonEntryConverter.str_to_str,
-    TupleComponents.data: JsonEntryConverter.str_to_str,
+    TupleComponents.data: JsonEntryConverter.str_to_bytes,
     TupleComponents.type: lambda x: TupleType(x),
 }
 
