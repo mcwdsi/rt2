@@ -1,4 +1,4 @@
-from rt_core_v2.ids_codes.rui import Rui, TempRef
+from rt_core_v2.ids_codes.rui import Rui, TempRef, ID_Rui
 from rt_core_v2.rttuple import (
     ANTuple,
     DITuple,
@@ -18,14 +18,14 @@ from rt_core_v2.rttuple import (
 from rt_core_v2.metadata import TupleEventType, RtChangeReason
 from rt_core_v2.factory import insert_rttuple
 
-ruin = Rui()
-ruia = Rui()
-ruit = Rui()
-ruid = Rui()
-ruics = Rui()
-ruir = Rui()
-ruin = Rui()
-ruidt = Rui()
+ruin = ID_Rui()
+ruia = ID_Rui()
+ruit = ID_Rui()
+ruid = ID_Rui()
+ruics = ID_Rui()
+ruir = ID_Rui()
+ruin = ID_Rui()
+ruidt = ID_Rui()
 
 unique = PorType.non_singular
 ar = RuiStatus.assigned

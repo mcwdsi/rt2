@@ -1,4 +1,4 @@
-from rt_core_v2.ids_codes.rui import Rui, TempRef
+from rt_core_v2.ids_codes.rui import Rui, TempRef, ID_Rui
 from uuid6 import uuid7
 from datetime import datetime, timezone
 
@@ -16,14 +16,14 @@ def print_tr(tr):
 
 
 def test_ruistatus():
-    default_rui_1 = Rui()
-    default_rui_2 = Rui()
+    default_rui_1 = ID_Rui()
+    default_rui_2 = ID_Rui()
 
     uuid_1 = uuid7()
     uuid_2 = uuid7()
-    set_rui_1 = Rui(uuid_1)
-    set_rui_2 = Rui(uuid_2)
-    clone_rui_1 = Rui(uuid_1)
+    set_rui_1 = ID_Rui(uuid_1)
+    set_rui_2 = ID_Rui(uuid_2)
+    clone_rui_1 = ID_Rui(uuid_1)
 
     assert default_rui_1.uuid != default_rui_2.uuid
     assert set_rui_1.uuid != set_rui_2.uuid

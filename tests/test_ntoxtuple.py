@@ -69,32 +69,32 @@ def print_NtoNTuple_tuple(NtoNTuple):
 
 
 # Rui that represents the person authoring these tuples
-a = rui.Rui()
+a = rui.ID_Rui()
 # Rui that stands for the repeatable PoR called "human being"
-h = rui.Rui()
+h = rui.ID_Rui()
 # Rui that stands for interval over which author has been instance of human being
-tr1 = rui.Rui()
+tr1 = rui.ID_Rui()
 k = ANTuple(tr1)
 
 NtoRTuple = NtoRTuple(polarity=True, r="part of", ruin=a, ruir=h, tr=rui.TempRef())
 print_NtoRTuple_tuple(NtoRTuple)
 
 # let x be the RUI standing for Kuala Lumpur
-x = rui.Rui()
+x = rui.ID_Rui()
 y = ANTuple(x)
 print_ANTuple(y)
 
-q = rui.Rui()
+q = rui.ID_Rui()
 z = ANTuple(q, ar=RuiStatus.reserved)
 print_ANTuple(z)
 
 # let s be the RUI standing for the territory of Malaysia
-s = rui.Rui()
+s = rui.ID_Rui()
 w = ANTuple(s)
 print_ANTuple(w)
 
 # let tr2 be interval over which kuala lumpur has been part of Malaysia
-tr2 = rui.Rui()
+tr2 = rui.ID_Rui()
 j = ANTuple(tr2)
 NtoNTuple = NtoNTuple(polarity=True, r="part of", p=[x, s], tr=rui.TempRef())
 print_NtoNTuple_tuple(NtoNTuple)

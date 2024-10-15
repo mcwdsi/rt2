@@ -14,6 +14,9 @@ from rt_core_v2.rttuple import (
     PorType,
     AttributesVisitor,
     RtTupleVisitor,
+    ID_Rui, 
+    ISO_Rui, 
+    UUI,
 )
 from rt_core_v2.ids_codes.rui import Rui, TempRef, Relationship
 from rt_core_v2.metadata import TupleEventType, RtChangeReason
@@ -22,7 +25,7 @@ from rt_core_v2.metadata import TupleEventType, RtChangeReason
 class RtTupleJSONEncoder(json.JSONEncoder):
     """Converts contents of RtTuples into a json representation"""
 
-    str_classes = {Rui, TempRef, PorType, RuiStatus, Relationship,}
+    str_classes = {Rui, TempRef, PorType, RuiStatus, Relationship, UUI, datetime}
     val_classes = {TupleType, RtChangeReason, TupleEventType,}
 
     def __init__(self, *args, **kwargs):
@@ -36,7 +39,6 @@ class RtTupleJSONEncoder(json.JSONEncoder):
             return obj.value
         if isinstance(obj, bytes):
             return base64.b64encode(obj).decode('utf-8')
-
         else:
             super().default(obj)
 
@@ -80,28 +82,50 @@ def write_tuples(
 
 class JsonEntryConverter:
     """Contains functions for converting correclty formatted json representations of tuple fields to tuple fields"""
+    format = "%Y-%m-%d %H:%M:%S.%f%z"
 
     @staticmethod
     def str_to_rui(x: str) -> Rui:
-        return Rui(UUID(x))
-
+        if ':' in x:
+            return JsonEntryConverter.str_to_isorui(x)
+        else:
+            return JsonEntryConverter.str_to_idrui(x)
+    
+    @staticmethod
+    def str_to_idrui(x: str) -> ID_Rui:
+        val = UUID(x)
+        return ID_Rui(val)
+    
+    @staticmethod
+    def str_to_isorui(x: str) -> ISO_Rui:
+        return ISO_Rui(datetime.strptime(x, JsonEntryConverter.format))
+    
+    @staticmethod 
+    def str_to_uui(x: str) -> UUI:
+        return UUI(x)
+    
+    @staticmethod
+    def str_to_relationship(x: str) -> Relationship:
+        return Relationship(x)
 
     @staticmethod
     def lst_to_ruis(x: list[str]) -> list[Rui]:
-        return [Rui(UUID(entry)) for entry in x]
+        return [JsonEntryConverter.str_to_rui(entry) for entry in x]
 
     @staticmethod
     def str_to_str(x: str):
         return x
     
     @staticmethod
+    def process_datetime(x: str):
+        return datetime.strptime(x, JsonEntryConverter.format)
+    
+    @staticmethod
     def process_temp_ref(x: str):
-        #UUIDs do not contain colons. A bit hacky, so find a better way to differentiate.
         if ':' in x:
-            format = "%Y-%m-%d %H:%M:%S.%f%z"
-            time_data = datetime.strptime(x, format)
+            time_data = JsonEntryConverter.str_to_isorui(x)
         else:
-            time_data = Rui(UUID(x))
+            time_data = JsonEntryConverter.str_to_idrui(x)
         return TempRef(time_data)
     
     @staticmethod
@@ -115,18 +139,17 @@ class JsonEntryConverter:
 
 
 json_entry_converter = {
-    TupleComponents.rui: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruin: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruia: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruid: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruin: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruir: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruics: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruidt: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruit: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruitn: JsonEntryConverter.str_to_rui,
-    TupleComponents.ruio: JsonEntryConverter.str_to_rui,
-    TupleComponents.t: JsonEntryConverter.process_temp_ref,
+    TupleComponents.rui: JsonEntryConverter.str_to_idrui,
+    TupleComponents.ruin: JsonEntryConverter.str_to_idrui,
+    TupleComponents.ruia: JsonEntryConverter.str_to_idrui,
+    TupleComponents.ruid: JsonEntryConverter.str_to_idrui,
+    TupleComponents.ruir: JsonEntryConverter.str_to_uui,
+    TupleComponents.ruics: JsonEntryConverter.str_to_uui,
+    TupleComponents.ruidt: JsonEntryConverter.str_to_idrui,
+    TupleComponents.ruit: JsonEntryConverter.str_to_idrui,
+    TupleComponents.ruitn: JsonEntryConverter.str_to_idrui,
+    TupleComponents.ruio: JsonEntryConverter.str_to_idrui,
+    TupleComponents.t: JsonEntryConverter.process_datetime,
     TupleComponents.ta: JsonEntryConverter.process_temp_ref,
     TupleComponents.tr: JsonEntryConverter.process_temp_ref,
     TupleComponents.ar: lambda x: RuiStatus(x),
@@ -137,7 +160,7 @@ json_entry_converter = {
     TupleComponents.p_list: JsonEntryConverter.lst_to_ruis,
     TupleComponents.C: lambda x: float(x),
     TupleComponents.polarity: lambda x: bool(x),
-    TupleComponents.r: JsonEntryConverter.str_to_rui,
+    TupleComponents.r: JsonEntryConverter.str_to_relationship,
     TupleComponents.code: JsonEntryConverter.str_to_str,
     TupleComponents.data: JsonEntryConverter.str_to_bytes,
     TupleComponents.type: lambda x: TupleType(x),

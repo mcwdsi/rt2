@@ -32,14 +32,14 @@ def print_f_tuple(ft):
 
 
 # create two ANTuples with a = rui of person assigning rui to things
-a = rui.Rui()
-s = rui.Rui()
+a = rui.ID_Rui()
+s = rui.ID_Rui()
 w = ANTuple(a)
 x = ANTuple(s)
 
 # create two D tuples for each ANTuple
 # the entity registering the tuples in the RTS
-dr = rui.Rui()
+dr = rui.ID_Rui()
 # metadata or D tuple for w (ANTuple)
 dt1 = DCTuple(ruid=a, ruit=a, event=TupleEventType.INSERT, event_reason=RtChangeReason.REALITY)
 # metadata or D tuple for x (ANTuple)
