@@ -22,7 +22,7 @@ def print_attribute(a):
     print()
 
 
-csrui = rui.Rui()
+csrui = rui.ID_Rui()
 c1 = concept.Concept("12345678", csrui)
 c2 = concept.Concept("98765432", csrui, "type 2 diabetes mellitus")
 

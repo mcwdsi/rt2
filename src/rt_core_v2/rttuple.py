@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from typing import ClassVar, override
 
-from rt_core_v2.ids_codes.rui import Rui, TempRef, Relationship
+from rt_core_v2.ids_codes.rui import Rui, UUI, ID_Rui, ISO_Rui, TempRef, Relationship
 from rt_core_v2.metadata import TupleEventType, ValueEnum, RtChangeReason
 from datetime import datetime, timezone
 
@@ -110,7 +110,7 @@ class RtTuple(ABC):
     """
 
     tuple_type: ClassVar[TupleType] = None
-    rui: Rui = field(default_factory=Rui)
+    rui: ID_Rui = field(default_factory=ID_Rui)
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -129,12 +129,12 @@ class ANTuple(RtTuple):
     ar -- The status of ruin
     ruin -- The Rui that is being assigned for the first time
     ruia -- The Rui of the author of this ANTuple
-    unique -- Asserts whether this is a non-repeatable or repeatable portion of reality
+    unique -- Asserts whether this POR is singuarly unique
     t -- The time of the creation of the ANTuple
     """
 
     tuple_type: ClassVar[TupleType] = TupleType.AN
-    ruin: Rui = field(default_factory=Rui)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
     ar: RuiStatus = RuiStatus.assigned
     unique: PorType = PorType.singular
 
@@ -145,14 +145,13 @@ class ARTuple(RtTuple):
     Attributes:
     ar -- The status of ruin
     ruin -- The Rui that is being assigned for the first time
-    ruia -- The Rui of the author of this ARTuple
-    unique -- Asserts whether this is a non-repeatable or repeatable portion of reality
+    unique -- Asserts whether this POR is singuarly unique
     t -- The time of the creation of the ARTuple
     """
 
     tuple_type: ClassVar[TupleType] = TupleType.AR
-    ruir: Rui = field(default_factory=Rui)
-    ruio: Rui = field(default_factory=Rui)
+    ruir: UUI = field(default_factory=UUI)
+    ruio: ID_Rui = field(default_factory=ID_Rui)
     ar: RuiStatus = RuiStatus.assigned
     unique: PorType = PorType.singular
 
@@ -172,11 +171,11 @@ class DITuple(RtTuple):
     # D#< RUId, RUIT, t, ‘I’/E, R, S >
 
     tuple_type: ClassVar[TupleType] = TupleType.DI
-    ruit: Rui = field(default_factory=Rui)
-    ruid: Rui = field(default_factory=Rui)
+    ruit: ID_Rui = field(default_factory=ID_Rui)
+    ruid: ID_Rui = field(default_factory=ID_Rui)
     t: datetime = field(default_factory=lambda : datetime.now().astimezone(timezone.utc))
     event_reason: RtChangeReason = RtChangeReason.REALITY
-    ruia: Rui = field(default_factory=Rui)
+    ruia: ID_Rui = field(default_factory=ID_Rui)
     ta: TempRef = field(default_factory=TempRef)
 
 
@@ -195,13 +194,12 @@ class DCTuple(RtTuple):
     # D#< RUId, RUIT, t, ‘I’/E, R, S >
 
     tuple_type: ClassVar[TupleType] = TupleType.DC
-    ruit: Rui = field(default_factory=Rui)
-    ruid: Rui = field(default_factory=Rui)
+    ruit: ID_Rui = field(default_factory=ID_Rui)
+    ruid: ID_Rui = field(default_factory=ID_Rui)
     t: datetime = field(default_factory=lambda : datetime.now().astimezone(timezone.utc))
     event: TupleEventType = TupleEventType.INVALIDATE
     event_reason: RtChangeReason = RtChangeReason.R01
-    #TODO Make replacements a shallow copy
-    replacements: list[Rui] = field(default_factory=list)
+    replacements: list[ID_Rui] = field(default_factory=list)
 
 
 @dataclass(eq=False)
@@ -219,7 +217,7 @@ class FTuple(RtTuple):
     # F#< RUITN, C >
 
     tuple_type: ClassVar[TupleType] = TupleType.F
-    ruitn: Rui = field(default_factory=Rui)
+    ruitn: ID_Rui = field(default_factory=ID_Rui)
     C: float = 1.0
 
 
@@ -238,8 +236,7 @@ class NtoNTuple(RtTuple):
     # NtoNTuple#< ‘+’/‘-’, r, P, tr/‘-’ >
     tuple_type: ClassVar[TupleType] = TupleType.NtoN
     polarity: bool = True
-    r: Rui = field(default_factory=Rui)
-    #TODO Make a copy of p
+    r: Relationship = field(default_factory=Relationship)
     p: list[Rui] = field(default_factory=list)
     tr: TempRef = field(default_factory=TempRef)
 
@@ -260,9 +257,9 @@ class NtoRTuple(RtTuple):
 
     tuple_type: ClassVar[TupleType] = TupleType.NtoR
     polarity: bool = True
-    r: Rui = field(default_factory=Rui)
-    ruin: Rui = field(default_factory=Rui)
-    ruir: Rui = field(default_factory=Rui)
+    r: Relationship = field(default_factory=Relationship)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
+    ruir: UUI = field(default_factory=UUI)
     tr: TempRef = field(default_factory=TempRef)
 
 
@@ -286,9 +283,9 @@ class NtoCTuple(RtTuple):
 
     tuple_type: ClassVar[TupleType] = TupleType.NtoC
     polarity: bool = True
-    r: Rui = field(default_factory=Rui)
-    ruics: Rui = field(default_factory=Rui)
-    ruin: Rui = field(default_factory=Rui)
+    r: Relationship = field(default_factory=Relationship)
+    ruics: UUI = field(default_factory=UUI)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
     code: str = ""
     tr: TempRef = field(default_factory=TempRef)
 
@@ -299,7 +296,6 @@ class NtoCTuple(RtTuple):
 # (2) an NtoNTuple tuple to relate the name to what the IdD denotes, and
 # (3) an NtoDE tuple to hold the actual written (or "string") form of the IdD.
 # Note that an IdD can be a name, identifier, etc.
-# TODO Figure out if data should be a string or generic data
 @dataclass(eq=False)
 class NtoDETuple(RtTuple):
     """Tuple type that creates a connection between a non-repeatable portion of reality and a piece of data
@@ -315,9 +311,10 @@ class NtoDETuple(RtTuple):
 
     tuple_type: ClassVar[TupleType] = TupleType.NtoDE
     polarity: bool = True
-    ruin: Rui = field(default_factory=Rui)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
     data: bytes = b''
-    ruidt: Rui = field(default_factory=Rui)
+    #TODO Figure out if this is a uri or a uuid
+    ruidt: ID_Rui = field(default_factory=ID_Rui)
 
 @dataclass(eq=False)
 class NtoLackRTuple(RtTuple):
@@ -334,9 +331,9 @@ class NtoLackRTuple(RtTuple):
     # NtoRTuple(-) -tuple NtoRTuple(-)#< r, ruin, RUIr, rT/‘-’, tr/‘-’ >
 
     tuple_type: ClassVar[TupleType] = TupleType.NtoLackR
-    r: Rui = field(default_factory=Rui)
-    ruin: Rui = field(default_factory=Rui)
-    ruir: Rui = field(default_factory=Rui)
+    r: Relationship = field(default_factory=Relationship)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
+    ruir: UUI = field(default_factory=UUI)
     tr: TempRef = field(default_factory=TempRef)
 
 """Mapping from tuple id to the corresponding tuple class"""
