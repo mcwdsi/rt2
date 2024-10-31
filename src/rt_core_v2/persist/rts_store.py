@@ -13,7 +13,6 @@ class TupleQuery:
         rui: Optional[Rui] = None,
         author_rui: Optional[Rui] = None,
         relationship: Optional[Relationship] = None,
-        universal_uui: Optional[UUI] = None,
         begin_timestamp: Optional[TempRef] = None,
         end_timestamp: Optional[TempRef] = None,
         ta: Optional[TempRef] = None,
@@ -28,14 +27,13 @@ class TupleQuery:
         p_list: Optional[list[Rui]] = None,
         replacements: Optional[list[Rui]] = None,
         nonrepeatable_rui: Optional[Rui] = None,
-        repeatable_rui: Optional[Rui] = None
+        repeatable_uui: Optional[UUI] = None
     ):
         self.types: set[TupleType] = types if types is not None else set()
         self.rui: Optional[Rui] = rui
         self.author_rui: Optional[Rui] = author_rui
         self.relationship: Optional[Relationship] = relationship
-        self.universal_uui: Optional[UUI] = universal_uui
-        self.repeatable_rui: Optional[Rui] = repeatable_rui
+        self.repeatable_uui: Optional[UUI] = repeatable_uui
         self.nonrepeatable_rui: Optional[Rui] = nonrepeatable_rui
         self.begin_timestamp: Optional[TempRef] = begin_timestamp
         self.end_timestamp: Optional[TempRef] = end_timestamp
@@ -100,7 +98,6 @@ class TupleQuery:
             or self.change_reason
             or self.datatype
             or self.change_code
-            or self.universal_uui
             or self.polarity
             or self.tr
             or self.concept_code
@@ -122,7 +119,7 @@ class TupleQuery:
             or self.datatype
             or self.change_code
             or self.polarity
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.tr
             or self.concept_code
             or self.confidence
@@ -140,9 +137,8 @@ class TupleQuery:
             self.data
             or self.datatype
             or self.relationship
-            or self.universal_uui
             or self.polarity
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.tr
             or self.concept_code
             or self.confidence
@@ -160,9 +156,8 @@ class TupleQuery:
             self.data
             or self.datatype
             or self.relationship
-            or self.universal_uui
             or self.polarity
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.tr
             or self.concept_code
             or self.confidence
@@ -182,9 +177,8 @@ class TupleQuery:
             or self.change_reason
             or self.datatype
             or self.change_code
-            or self.universal_uui
             or self.polarity
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.tr
             or self.concept_code
             or self.p_list
@@ -202,8 +196,7 @@ class TupleQuery:
             or self.datatype
             or self.change_reason
             or self.change_code
-            or self.universal_uui
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.concept_code
             or self.confidence
             or self.replacements
@@ -237,7 +230,6 @@ class TupleQuery:
             or self.datatype
             or self.change_reason
             or self.change_code
-            or self.universal_uui
             or self.confidence
             or self.p_list
             or self.replacements
@@ -252,7 +244,6 @@ class TupleQuery:
         if (
             self.change_reason
             or self.change_code
-            or self.universal_uui
             or self.tr
             or self.concept_code
             or self.confidence
