@@ -314,7 +314,7 @@ class NtoDETuple(RtTuple):
     ruin: ID_Rui = field(default_factory=ID_Rui)
     data: bytes = b''
     #TODO Figure out if this is a uri or a uuid
-    ruidt: ID_Rui = field(default_factory=ID_Rui)
+    ruidt: UUI = field(default_factory=UUI)
 
 @dataclass(eq=False)
 class NtoLackRTuple(RtTuple):
