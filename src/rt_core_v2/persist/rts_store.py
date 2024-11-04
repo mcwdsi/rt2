@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from rt_core_v2.rttuple import RtTuple, TupleType
-from rt_core_v2.ids_codes.rui import Rui, TempRef
+from rt_core_v2.ids_codes.rui import Rui, TempRef, UUI, Relationship
 from rt_core_v2.metadata import RtChangeReason, TupleEventType
 
 
@@ -12,14 +12,13 @@ class TupleQuery:
         types: set[TupleType] = None,
         rui: Optional[Rui] = None,
         author_rui: Optional[Rui] = None,
-        relationship_rui: Optional[Rui] = None,
-        universal_rui: Optional[Rui] = None,
+        relationship: Optional[Relationship] = None,
         begin_timestamp: Optional[TempRef] = None,
         end_timestamp: Optional[TempRef] = None,
         ta: Optional[TempRef] = None,
         tr: Optional[TempRef] = None,
         data: Optional[bytes] = None,
-        datatype: Optional[Rui] = None,
+        datatype: Optional[UUI] = None,
         polarity: Optional[bool] = None,
         change_reason: Optional[RtChangeReason] = None,
         change_code: Optional[TupleEventType] = None,
@@ -28,21 +27,20 @@ class TupleQuery:
         p_list: Optional[list[Rui]] = None,
         replacements: Optional[list[Rui]] = None,
         nonrepeatable_rui: Optional[Rui] = None,
-        repeatable_rui: Optional[Rui] = None
+        repeatable_uui: Optional[UUI] = None
     ):
         self.types: set[TupleType] = types if types is not None else set()
         self.rui: Optional[Rui] = rui
         self.author_rui: Optional[Rui] = author_rui
-        self.relationship_rui: Optional[Rui] = relationship_rui
-        self.universal_rui: Optional[Rui] = universal_rui
-        self.repeatable_rui: Optional[Rui] = repeatable_rui
+        self.relationship: Optional[Relationship] = relationship
+        self.repeatable_uui: Optional[UUI] = repeatable_uui
         self.nonrepeatable_rui: Optional[Rui] = nonrepeatable_rui
         self.begin_timestamp: Optional[TempRef] = begin_timestamp
         self.end_timestamp: Optional[TempRef] = end_timestamp
         self.ta: Optional[TempRef] = ta
         self.tr: Optional[TempRef] = tr
         self.data: Optional[bytes] = data
-        self.datatype: Optional[Rui] = datatype
+        self.datatype: Optional[UUI] = datatype
         self.polarity: Optional[bool] = polarity
         self.change_reason: Optional[RtChangeReason] = change_reason
         self.change_code: Optional[TupleEventType] = change_code
@@ -95,12 +93,11 @@ class TupleQuery:
             return False
         # ANTuple only has rui, ruia, ruin, ar, unique, and t
         if (
-            self.relationship_rui
+            self.relationship
             or self.data
             or self.change_reason
             or self.datatype
             or self.change_code
-            or self.universal_rui
             or self.polarity
             or self.tr
             or self.concept_code
@@ -116,13 +113,13 @@ class TupleQuery:
             return False
         # ARTuple has ruir, ruio, ar, unique, rui, and t
         if (
-            self.relationship_rui
+            self.relationship
             or self.data
             or self.change_reason
             or self.datatype
             or self.change_code
             or self.polarity
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.tr
             or self.concept_code
             or self.confidence
@@ -139,10 +136,9 @@ class TupleQuery:
         if (
             self.data
             or self.datatype
-            or self.relationship_rui
-            or self.universal_rui
+            or self.relationship
             or self.polarity
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.tr
             or self.concept_code
             or self.confidence
@@ -159,10 +155,9 @@ class TupleQuery:
         if (
             self.data
             or self.datatype
-            or self.relationship_rui
-            or self.universal_rui
+            or self.relationship
             or self.polarity
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.tr
             or self.concept_code
             or self.confidence
@@ -177,14 +172,13 @@ class TupleQuery:
             return False
         # FTuple has ruitn, C (confidence level), and t
         if (
-            self.relationship_rui
+            self.relationship
             or self.data
             or self.change_reason
             or self.datatype
             or self.change_code
-            or self.universal_rui
             or self.polarity
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.tr
             or self.concept_code
             or self.p_list
@@ -202,8 +196,7 @@ class TupleQuery:
             or self.datatype
             or self.change_reason
             or self.change_code
-            or self.universal_rui
-            or self.repeatable_rui
+            or self.repeatable_uui
             or self.concept_code
             or self.confidence
             or self.replacements
@@ -237,7 +230,6 @@ class TupleQuery:
             or self.datatype
             or self.change_reason
             or self.change_code
-            or self.universal_rui
             or self.confidence
             or self.p_list
             or self.replacements
@@ -252,7 +244,6 @@ class TupleQuery:
         if (
             self.change_reason
             or self.change_code
-            or self.universal_rui
             or self.tr
             or self.concept_code
             or self.confidence

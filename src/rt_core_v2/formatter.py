@@ -145,7 +145,7 @@ json_entry_converter = {
     TupleComponents.ruid: JsonEntryConverter.str_to_idrui,
     TupleComponents.ruir: JsonEntryConverter.str_to_uui,
     TupleComponents.ruics: JsonEntryConverter.str_to_uui,
-    TupleComponents.ruidt: JsonEntryConverter.str_to_idrui,
+    TupleComponents.ruidt: JsonEntryConverter.str_to_uui,
     TupleComponents.ruit: JsonEntryConverter.str_to_idrui,
     TupleComponents.ruitn: JsonEntryConverter.str_to_idrui,
     TupleComponents.ruio: JsonEntryConverter.str_to_idrui,

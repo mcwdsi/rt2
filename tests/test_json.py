@@ -36,7 +36,7 @@ ruid = ID_Rui()
 ruics = UUI()
 ruir = UUI()
 ruin = ID_Rui()
-ruidt = ID_Rui()
+ruidt = UUI()
 ruio = ID_Rui()
 rui = ID_Rui()
 
@@ -46,7 +46,7 @@ t = datetime.now().astimezone(timezone.utc)
 time_1 = TempRef()
 event = TupleEventType.REVALIDATE
 reason = RtChangeReason.BELIEF
-replacements = [ruin, ruidt, ruin]
+replacements = [ruin, ruin]
 polarity = False
 relation = Relationship()
 p_list = [ruid, ruin]
@@ -111,13 +111,13 @@ def test_dituple_json():
     )
     formatted_d = format_rttuple(d)
     expected_d = f'{{"tuple_type": "{d.tuple_type}", "ruid": "{ruid}", "ruit": "{ruit}", "t": "{t}", "event_reason": {reason}, "rui": "{rui}", "ruia": "{ruia}", "ta": "{time_1}"}}'
-    print("Dtuple Expected:  \n" + expected_d)
-    print("Dtuple Processed:  \n" + formatted_d)
+    print("Dituple Expected:  \n" + expected_d)
+    print("Dituple Processed:  \n" + formatted_d)
     assert compare(formatted_d, expected_d)
 
     recreated_d = json_to_rttuple(formatted_d)
-    print(f"Original DTuple:  {d.accept(get_attributes)}")
-    print(f"Recreated DTuple:  {recreated_d.accept(get_attributes)}")
+    print(f"Original DiTuple:  {d.accept(get_attributes)}")
+    print(f"Recreated DiTuple:  {recreated_d.accept(get_attributes)}")
     assert d == recreated_d
 
 def test_dctuple_json():
@@ -134,6 +134,8 @@ def test_dctuple_json():
     recreated_d = json_to_rttuple(formatted_d)
     print(f"Original DcTuple:  {d.accept(get_attributes)}")
     print(f"Recreated DcTuple:  {recreated_d.accept(get_attributes)}")
+    print(json.dumps(json.loads(formatted_d), indent=5))
+    print(type(formatted_d))
     assert d == recreated_d
 
 
