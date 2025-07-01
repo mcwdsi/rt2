@@ -123,11 +123,11 @@ class RtTuple(ABC):
 
 @dataclass(eq=False)
 class ANTuple(RtTuple):
-    """Referent Tracking assignment tuple that registers assignment of an RUI to a PoR
+    """Referent Tracking assignment tuple that registers assignment of an RUI to a non-repeatable PoR
 
     Attributes:
-    ar -- The status of ruin
-    ruin -- The Rui that is being assigned for the first time
+    ar -- The status of ruin - assigned or reserved
+    ruin -- The Rui that is being created for the first time
     ruia -- The Rui of the author of this ANTuple
     unique -- Asserts whether this POR is singuarly unique
     t -- The time of the creation of the ANTuple
@@ -140,13 +140,19 @@ class ANTuple(RtTuple):
 
 @dataclass(eq=False)
 class ARTuple(RtTuple):
-    """Referent Tracking assignment tuple that registers assignment of an RUI to a PoR
+    """Referent Tracking assignment tuple that registers assignment of an RUI to a repeatable PoR
 
     Attributes:
-    ar -- The status of ruin
-    ruin -- The Rui that is being assigned for the first time
+    ar -- The status of ruin - assigned or reserved
+    ruir -- The ruir that is being created for the first time
+    ruio -- The rui of the ontology from which ruir derives
     unique -- Asserts whether this POR is singuarly unique
     t -- The time of the creation of the ARTuple
+
+    Note:
+       - We recognize we're getting dangerously close to incorporating ontology development into RT here.
+       - It will be a best practice to include an NtoDE with ruin that includes the label of the R POR.
+       - We allow IRIs in the UUI type
     """
 
     tuple_type: ClassVar[TupleType] = TupleType.AR
@@ -158,37 +164,48 @@ class ARTuple(RtTuple):
 
 @dataclass(eq=False)
 class DITuple(RtTuple):
-    """Referent Tracking metadata tuple that stores information regarding the instantation of other tuple types
+    """Referent Tracking metadata tuple that stores information regarding the insertion of other tuple types into an RT database
+
+    Literally, "metadata (D) for a tuple insertion (I) or DI"
 
     Attributes:
-    ruit -- The ruit of another tuple that this tuple stores information about
-    event -- The category of reason that caused the creation of tuple ruit
-    event_reason -- The reason for the event above occuring
-    td -- The time of this tuple's creation
-    replacements -- Any tuples that ruit replaces
+    ruit -- The rui of the tuple that this metadata tuple is about
+    ruid -- The entity who inserted the tuple into the database
+    event_reason -- The reason for the event above occuring - e.g., change in reality, relevance, belief, etc.
+    t -- The time of this tuple's creation
+    ruia -- The author of the tuple that this metadata tuple is about
+    ta -- The time of authorship of the tuple that this metadata tuple is about
+
+    We don't have an event_type here because the event_type is implictly tuple insertion based on this metadata tuple type
     """
 
-    # D#< RUId, RUIT, t, ‘I’/E, R, S >
+    # DI#< RUId, RUIT, t, R, RUIa, ta >
 
     tuple_type: ClassVar[TupleType] = TupleType.DI
     ruit: ID_Rui = field(default_factory=ID_Rui)
     ruid: ID_Rui = field(default_factory=ID_Rui)
     t: datetime = field(default_factory=lambda : datetime.now().astimezone(timezone.utc))
-    event_reason: RtChangeReason = RtChangeReason.REALITY
+    # The default reason for template insertion is a change in relevance although change in reality will also be common
+    event_reason: RtChangeReason = RtChangeReason.RELEVANCE
+    # author of the Tuple. Moved from F tuple to here because author might be different from person who expresses confidence level
     ruia: ID_Rui = field(default_factory=ID_Rui)
+    # time of tuple authorship. Moved from F tuple to here because time of authorship might be different from time of expressing a confidence level
     ta: TempRef = field(default_factory=TempRef)
 
 
 @dataclass(eq=False)
 class DCTuple(RtTuple):
-    """Referent Tracking metadata tuple that stores information regarding the instantation of other tuple types
+    """Referent Tracking metadata tuple that stores information regarding the change in status of other tuple types such as error correction
+
+    Literally, "metadata (D) for a change in tuple status (C) or DC"
 
     Attributes:
-    ruit -- The ruit of another tuple that this tuple stores information about
-    event -- The category of reason that caused the creation of tuple ruit
+    ruit -- The rui of another tuple that this tuple stores information about
+    ruid -- The rui of the entity making the change in tuple status
+    event -- The change made to tuple ruit, either invalidation or revalidation
     event_reason -- The reason for the event above occuring
-    td -- The time of this tuple's creation
-    replacements -- Any tuples that ruit replaces
+    t -- The time of this tuple's creation
+    replacements -- The ruis of any tuples that ruit replaces
     """
 
     # D#< RUId, RUIT, t, ‘I’/E, R, S >
@@ -197,7 +214,9 @@ class DCTuple(RtTuple):
     ruit: ID_Rui = field(default_factory=ID_Rui)
     ruid: ID_Rui = field(default_factory=ID_Rui)
     t: datetime = field(default_factory=lambda : datetime.now().astimezone(timezone.utc))
+    # The default event for a change in template status is template invalidation although revalidation is also possible
     event: TupleEventType = TupleEventType.INVALIDATE
+    # The default reason is R01 which applies only to NtoR tuples, and says that the relationship between ruin and ruir in the NtoR tuple does not hold
     event_reason: RtChangeReason = RtChangeReason.R01
     replacements: list[ID_Rui] = field(default_factory=list)
 
@@ -206,11 +225,10 @@ class DCTuple(RtTuple):
 class FTuple(RtTuple):
     """Referent Tracking metadata tuple that stores information regarding the confidence level in another tuple's assertions
 
+    Note that the time and author of this confidence assertion will be recorded in this F-tuple's associated D-tuple
+
     Attributes:
-    ruid -- The ruid of this tuple
-    ruia -- The ruid of the author making the assertion
-    ruitn -- The ruid of the tuple refered to by this tuple's confidence assertion.
-    ta -- The time instance of the confidence assertion.
+    ruitn -- The rui of the tuple that this confidence assertion is about.
     C -- The level of confidence from 0.00-1.00 in the assertion.
     """
 
