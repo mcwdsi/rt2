@@ -14,8 +14,8 @@ def insert_rttuple(tuple_arguments: dict, type: TupleType):
 # TODO Make rttuple_factory insert 
 def rttuple_factory(tuple_arguments: dict, type: TupleType, t: TempRef, event: TupleEventType, event_reason: RtChangeReason, replacements: list[Rui], author: Rui):
     # DTuples should only be created in tandem with another tuple
-    tuple_arguments = component_to_string(tuple_arguments)
-    if type is TupleType.D:
+    tuple_arguments = component_to_string(tuple_arguments.items())
+    if type in (TupleType.DI, TupleType.DC):
         return None
     try:
         concrete_tuple = type_to_class[type](**tuple_arguments)
@@ -33,10 +33,10 @@ def rttuple_factory(tuple_arguments: dict, type: TupleType, t: TempRef, event: T
     return concrete_tuple, meta_tuple
 
 #TODO Make a factory for each tuple that calls rttuple_factory
-def create_antuple(rui: Rui=None, ruia: Rui=None, ruin: Rui=None, ar: RuiStatus=RuiStatus.assigned, unique: PorType=PorType.singular, event=TupleEventType.INSERT, event_reason=RtChangeReason.BELIEF, replacements=[], author=None):
+def create_antuple(rui: Rui=None, ruia: Rui=None, ruin: Rui=None, ar: RuiStatus=RuiStatus.assigned, unique: PorType=PorType.singular, t: TempRef=None, event=TupleEventType.INSERT, event_reason=RtChangeReason.BELIEF, replacements=[], author=None):
     antuple_arguments = {TupleComponents.rui:rui, TupleComponents.ruin:ruin, TupleComponents.ar:ar, TupleComponents.unique:unique}
     author = author if author else ruia
-    return rttuple_factory(antuple_arguments, TupleType.AN, event, event_reason, replacements, author)
+    return rttuple_factory(antuple_arguments, TupleType.AN, t, event, event_reason, replacements, author)
 
 def create_ftuple(rui:Rui=None, ruid:Rui=None, ta:TempRef=None, C:float=1.0, ruitn:Rui=None, t: TempRef=None, event=TupleEventType.INSERT, event_reason=RtChangeReason.BELIEF, replacements=[], author=None):
     ftuple_arguments = {TupleComponents.rui:rui, TupleComponents.ruid:ruid, TupleComponents.ta:ta, TupleComponents.ruitn:ruitn, TupleComponents.C:C}
