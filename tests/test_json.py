@@ -1,6 +1,6 @@
 import json
 
-from rt_core_v2.ids_codes.rui import Rui, TempRef, Relationship
+from rt_core_v2.ids_codes.rui import Rui, ID_Rui, TempRef, Relationship, UUI
 from rt_core_v2.rttuple import (
     ANTuple,
     ARTuple,
@@ -16,7 +16,8 @@ from rt_core_v2.rttuple import (
 )
 from rt_core_v2.formatter import format_rttuple, json_to_rttuple
 from rt_core_v2.metadata import TupleEventType, RtChangeReason
-
+import base64
+from datetime import datetime, timezone
 
 def ordered(obj):
     if isinstance(obj, dict):
@@ -27,29 +28,31 @@ def ordered(obj):
         return obj
 
 
-ruin = Rui()
-ruia = Rui()
-ruit = Rui()
-ruitn = Rui()
-ruid = Rui()
-ruics = Rui()
-ruir = Rui()
-ruin = Rui()
-ruidt = Rui()
-ruio = Rui()
-rui = Rui()
+ruin = ID_Rui()
+ruia = ID_Rui()
+ruit = ID_Rui()
+ruitn = ID_Rui()
+ruid = ID_Rui()
+ruics = UUI()
+ruir = UUI()
+ruin = ID_Rui()
+ruidt = UUI()
+ruio = ID_Rui()
+rui = ID_Rui()
 
 get_attributes = AttributesVisitor()
 
+t = datetime.now().astimezone(timezone.utc)
 time_1 = TempRef()
 event = TupleEventType.REVALIDATE
 reason = RtChangeReason.BELIEF
-replacements = [ruin, ruidt, ruin]
+replacements = [ruin, ruin]
 polarity = False
-relation = Rui()
+relation = Relationship()
 p_list = [ruid, ruin]
 code = "code insert"
-data = "data insert"
+data_original = "data insert"
+data = data_original.encode('utf-8')
 
 """Converts the list into a json appropriate representation"""
 
@@ -104,26 +107,26 @@ def test_artuple_json():
 
 def test_dituple_json():
     d = DITuple(
-        ruit=ruit, t=time_1, event_reason=RtChangeReason.BELIEF, ruid=ruid, rui=rui, ruia=ruia, ta=time_1
+        ruit=ruit, t=t, event_reason=RtChangeReason.BELIEF, ruid=ruid, rui=rui, ruia=ruia, ta=time_1
     )
     formatted_d = format_rttuple(d)
-    expected_d = f'{{"tuple_type": "{d.tuple_type}", "ruid": "{ruid}", "ruit": "{ruit}", "t": "{time_1}", "event_reason": {reason}, "rui": "{rui}", "ruia": "{ruia}", "ta": "{time_1}"}}'
-    print("Dtuple Expected:  \n" + expected_d)
-    print("Dtuple Processed:  \n" + formatted_d)
+    expected_d = f'{{"tuple_type": "{d.tuple_type}", "ruid": "{ruid}", "ruit": "{ruit}", "t": "{t}", "event_reason": {reason}, "rui": "{rui}", "ruia": "{ruia}", "ta": "{time_1}"}}'
+    print("Dituple Expected:  \n" + expected_d)
+    print("Dituple Processed:  \n" + formatted_d)
     assert compare(formatted_d, expected_d)
 
     recreated_d = json_to_rttuple(formatted_d)
-    print(f"Original DTuple:  {d.accept(get_attributes)}")
-    print(f"Recreated DTuple:  {recreated_d.accept(get_attributes)}")
+    print(f"Original DiTuple:  {d.accept(get_attributes)}")
+    print(f"Recreated DiTuple:  {recreated_d.accept(get_attributes)}")
     assert d == recreated_d
 
 def test_dctuple_json():
     d = DCTuple(
-        ruit=ruit, t=time_1, event=TupleEventType.REVALIDATE, event_reason=RtChangeReason.BELIEF, ruid=ruid, replacements=replacements, rui=rui
+        ruit=ruit, t=t, event=TupleEventType.REVALIDATE, event_reason=RtChangeReason.BELIEF, ruid=ruid, replacements=replacements, rui=rui
     )
     formatted_d = format_rttuple(d)
     replacements_repr = jsonify_list(replacements)
-    expected_d = f'{{"tuple_type": "{d.tuple_type}", "ruid": "{ruid}", "ruit": "{ruit}", "t": "{time_1}", "event": {event}, "event_reason": {reason}, "replacements": {replacements_repr}, "rui": "{rui}"}}'
+    expected_d = f'{{"tuple_type": "{d.tuple_type}", "ruid": "{ruid}", "ruit": "{ruit}", "t": "{t}", "event": {event}, "event_reason": {reason}, "replacements": {replacements_repr}, "rui": "{rui}"}}'
     print("Dctuple Expected:  \n" + expected_d)
     print("Dctuple Processed:  \n" + formatted_d)
     assert compare(formatted_d, expected_d)
@@ -131,6 +134,8 @@ def test_dctuple_json():
     recreated_d = json_to_rttuple(formatted_d)
     print(f"Original DcTuple:  {d.accept(get_attributes)}")
     print(f"Recreated DcTuple:  {recreated_d.accept(get_attributes)}")
+    print(json.dumps(json.loads(formatted_d), indent=5))
+    print(type(formatted_d))
     assert d == recreated_d
 
 
@@ -205,8 +210,7 @@ def test_ntoc_json():
 def test_ntode_json():
     ntode = NtoDETuple(rui=rui, polarity=polarity, ruin=ruin, data=data, ruidt=ruidt)
     formatted_ntode = format_rttuple(ntode)
-    expected_ntode = f'{{"rui": "{rui}", "tuple_type": "{ntode.tuple_type}", "polarity": {str(polarity).lower()}, "ruin": "{ruin}", "ruidt": "{ruidt}", "data": "{data}"}}'
-
+    expected_ntode = f'{{"rui": "{rui}", "tuple_type": "{ntode.tuple_type}", "polarity": {str(polarity).lower()}, "ruin": "{ruin}", "ruidt": "{ruidt}", "data": "{base64.b64encode(data).decode('utf-8')}"}}'
     print("Ntoctuple Expected:  \n" + expected_ntode)
     print("Ntoctuple Processed:  \n" + formatted_ntode)
 

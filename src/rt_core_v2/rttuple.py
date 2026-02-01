@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, asdict
 from typing import ClassVar, override
 
-from rt_core_v2.ids_codes.rui import Rui, TempRef, Relationship
+from rt_core_v2.ids_codes.rui import Rui, UUI, ID_Rui, ISO_Rui, TempRef, Relationship
 from rt_core_v2.metadata import TupleEventType, ValueEnum, RtChangeReason
 from datetime import datetime, timezone
 
@@ -110,7 +110,7 @@ class RtTuple(ABC):
     """
 
     tuple_type: ClassVar[TupleType] = None
-    rui: Rui = field(default_factory=Rui)
+    rui: ID_Rui = field(default_factory=ID_Rui)
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -123,103 +123,119 @@ class RtTuple(ABC):
 
 @dataclass(eq=False)
 class ANTuple(RtTuple):
-    """Referent Tracking assignment tuple that registers assignment of an RUI to a PoR
+    """Referent Tracking assignment tuple that registers assignment of an RUI to a non-repeatable PoR
 
     Attributes:
-    ar -- The status of ruin
-    ruin -- The Rui that is being assigned for the first time
+    ar -- The status of ruin - assigned or reserved
+    ruin -- The Rui that is being created for the first time
     ruia -- The Rui of the author of this ANTuple
-    unique -- Asserts whether this is a non-repeatable or repeatable portion of reality
+    unique -- Asserts whether this POR is singuarly unique
     t -- The time of the creation of the ANTuple
     """
 
     tuple_type: ClassVar[TupleType] = TupleType.AN
-    ruin: Rui = field(default_factory=Rui)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
     ar: RuiStatus = RuiStatus.assigned
     unique: PorType = PorType.singular
 
 @dataclass(eq=False)
 class ARTuple(RtTuple):
-    """Referent Tracking assignment tuple that registers assignment of an RUI to a PoR
+    """Referent Tracking assignment tuple that registers assignment of an RUI to a repeatable PoR
 
     Attributes:
-    ar -- The status of ruin
-    ruin -- The Rui that is being assigned for the first time
-    ruia -- The Rui of the author of this ARTuple
-    unique -- Asserts whether this is a non-repeatable or repeatable portion of reality
+    ar -- The status of ruin - assigned or reserved
+    ruir -- The ruir that is being created for the first time
+    ruio -- The rui of the ontology from which ruir derives
+    unique -- Asserts whether this POR is singuarly unique
     t -- The time of the creation of the ARTuple
+
+    Note:
+       - We recognize we're getting dangerously close to incorporating ontology development into RT here.
+       - It will be a best practice to include an NtoDE with ruin that includes the label of the R POR.
+       - We allow IRIs in the UUI type
     """
 
     tuple_type: ClassVar[TupleType] = TupleType.AR
-    ruir: Rui = field(default_factory=Rui)
-    ruio: Rui = field(default_factory=Rui)
+    ruir: UUI = field(default_factory=UUI)
+    ruio: ID_Rui = field(default_factory=ID_Rui)
     ar: RuiStatus = RuiStatus.assigned
     unique: PorType = PorType.singular
 
 
 @dataclass(eq=False)
 class DITuple(RtTuple):
-    """Referent Tracking metadata tuple that stores information regarding the instantation of other tuple types
+    """Referent Tracking metadata tuple that stores information regarding the insertion of other tuple types into an RT database
+
+    Literally, "metadata (D) for a tuple insertion (I) or DI"
 
     Attributes:
-    ruit -- The ruit of another tuple that this tuple stores information about
-    event -- The category of reason that caused the creation of tuple ruit
-    event_reason -- The reason for the event above occuring
-    td -- The time of this tuple's creation
-    replacements -- Any tuples that ruit replaces
+    ruit -- The rui of the tuple that this metadata tuple is about
+    ruid -- The entity who inserted the tuple into the database
+    event_reason -- The reason for the event above occuring - e.g., change in reality, relevance, belief, etc.
+    t -- The time of this tuple's creation
+    ruia -- The author of the tuple that this metadata tuple is about
+    ta -- The time of authorship of the tuple that this metadata tuple is about
+
+    We don't have an event_type here because the event_type is implictly tuple insertion based on this metadata tuple type
     """
 
-    # D#< RUId, RUIT, t, ‘I’/E, R, S >
+    # DI#< RUId, RUIT, t, R, RUIa, ta >
 
     tuple_type: ClassVar[TupleType] = TupleType.DI
-    ruit: Rui = field(default_factory=Rui)
-    ruid: Rui = field(default_factory=Rui)
+    ruit: ID_Rui = field(default_factory=ID_Rui)
+    ruid: ID_Rui = field(default_factory=ID_Rui)
     t: datetime = field(default_factory=lambda : datetime.now().astimezone(timezone.utc))
-    event_reason: RtChangeReason = RtChangeReason.REALITY
-    ruia: Rui = field(default_factory=Rui)
+    # The default reason for template insertion is a change in relevance although change in reality will also be common
+    event_reason: RtChangeReason = RtChangeReason.RELEVANCE
+    # author of the Tuple. Moved from F tuple to here because author might be different from person who expresses confidence level
+    ruia: ID_Rui = field(default_factory=ID_Rui)
+    # time of tuple authorship. Moved from F tuple to here because time of authorship might be different from time of expressing a confidence level
     ta: TempRef = field(default_factory=TempRef)
 
 
 @dataclass(eq=False)
 class DCTuple(RtTuple):
-    """Referent Tracking metadata tuple that stores information regarding the instantation of other tuple types
+    """Referent Tracking metadata tuple that stores information regarding the change in status of other tuple types such as error correction
+
+    Literally, "metadata (D) for a change in tuple status (C) or DC"
 
     Attributes:
-    ruit -- The ruit of another tuple that this tuple stores information about
-    event -- The category of reason that caused the creation of tuple ruit
+    ruit -- The rui of another tuple that this tuple stores information about
+    ruid -- The rui of the entity making the change in tuple status
+    event -- The change made to tuple ruit, either invalidation or revalidation
     event_reason -- The reason for the event above occuring
-    td -- The time of this tuple's creation
-    replacements -- Any tuples that ruit replaces
+    t -- The time of this tuple's creation
+    replacements -- The ruis of any tuples that ruit replaces
     """
 
     # D#< RUId, RUIT, t, ‘I’/E, R, S >
 
     tuple_type: ClassVar[TupleType] = TupleType.DC
-    ruit: Rui = field(default_factory=Rui)
-    ruid: Rui = field(default_factory=Rui)
+    ruit: ID_Rui = field(default_factory=ID_Rui)
+    ruid: ID_Rui = field(default_factory=ID_Rui)
     t: datetime = field(default_factory=lambda : datetime.now().astimezone(timezone.utc))
+    # The default event for a change in template status is template invalidation although revalidation is also possible
     event: TupleEventType = TupleEventType.INVALIDATE
+    # The default reason is R01 which applies only to NtoR tuples, and says that the relationship between ruin and ruir in the NtoR tuple does not hold
     event_reason: RtChangeReason = RtChangeReason.R01
-    #TODO Make replacements a shallow copy
-    replacements: list[Rui] = field(default_factory=list)
+    replacements: list[ID_Rui] = field(default_factory=list)
 
 
 @dataclass(eq=False)
 class FTuple(RtTuple):
     """Referent Tracking metadata tuple that stores information regarding the confidence level in another tuple's assertions
 
+    Note that the time and author of this confidence assertion will be recorded in this F-tuple's associated D-tuple
+
     Attributes:
-    ruid -- The ruid of this tuple
-    ruia -- The ruid of the author making the assertion
-    ruitn -- The ruid of the tuple refered to by this tuple's confidence assertion.
-    ta -- The time instance of the confidence assertion.
+    ruitn -- The rui of the tuple that this confidence assertion is about.
     C -- The level of confidence from 0.00-1.00 in the assertion.
     """
 
     # F#< RUITN, C >
 
     tuple_type: ClassVar[TupleType] = TupleType.F
-    ruitn: Rui = field(default_factory=Rui)
+    ruitn: ID_Rui = field(default_factory=ID_Rui)
     C: float = 1.0
 
 
@@ -238,8 +254,7 @@ class NtoNTuple(RtTuple):
     # NtoNTuple#< ‘+’/‘-’, r, P, tr/‘-’ >
     tuple_type: ClassVar[TupleType] = TupleType.NtoN
     polarity: bool = True
-    r: Rui = field(default_factory=Rui)
-    #TODO Make a copy of p
+    r: Relationship = field(default_factory=Relationship)
     p: list[Rui] = field(default_factory=list)
     tr: TempRef = field(default_factory=TempRef)
 
@@ -260,9 +275,9 @@ class NtoRTuple(RtTuple):
 
     tuple_type: ClassVar[TupleType] = TupleType.NtoR
     polarity: bool = True
-    r: Rui = field(default_factory=Rui)
-    ruin: Rui = field(default_factory=Rui)
-    ruir: Rui = field(default_factory=Rui)
+    r: Relationship = field(default_factory=Relationship)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
+    ruir: UUI = field(default_factory=UUI)
     tr: TempRef = field(default_factory=TempRef)
 
 
@@ -286,12 +301,11 @@ class NtoCTuple(RtTuple):
 
     tuple_type: ClassVar[TupleType] = TupleType.NtoC
     polarity: bool = True
-    r: Rui = field(default_factory=Rui)
-    ruics: Rui = field(default_factory=Rui)
-    ruin: Rui = field(default_factory=Rui)
+    r: Relationship = field(default_factory=Relationship)
+    ruics: UUI = field(default_factory=UUI)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
     code: str = ""
     tr: TempRef = field(default_factory=TempRef)
-    # TODO Make creating a tempref create an underlying time instance
 
 
 # We use NtoDE instead of NtoI, and we use an instance for the identifying descriptor
@@ -300,7 +314,6 @@ class NtoCTuple(RtTuple):
 # (2) an NtoNTuple tuple to relate the name to what the IdD denotes, and
 # (3) an NtoDE tuple to hold the actual written (or "string") form of the IdD.
 # Note that an IdD can be a name, identifier, etc.
-# TODO Figure out if data should be a string or generic data
 @dataclass(eq=False)
 class NtoDETuple(RtTuple):
     """Tuple type that creates a connection between a non-repeatable portion of reality and a piece of data
@@ -316,9 +329,10 @@ class NtoDETuple(RtTuple):
 
     tuple_type: ClassVar[TupleType] = TupleType.NtoDE
     polarity: bool = True
-    ruin: Rui = field(default_factory=Rui)
-    data: str =""
-    ruidt: Rui = field(default_factory=Rui)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
+    data: bytes = b''
+    #TODO Figure out if this is a uri or a uuid
+    ruidt: UUI = field(default_factory=UUI)
 
 @dataclass(eq=False)
 class NtoLackRTuple(RtTuple):
@@ -335,9 +349,9 @@ class NtoLackRTuple(RtTuple):
     # NtoRTuple(-) -tuple NtoRTuple(-)#< r, ruin, RUIr, rT/‘-’, tr/‘-’ >
 
     tuple_type: ClassVar[TupleType] = TupleType.NtoLackR
-    r: Rui = field(default_factory=Rui)
-    ruin: Rui = field(default_factory=Rui)
-    ruir: Rui = field(default_factory=Rui)
+    r: Relationship = field(default_factory=Relationship)
+    ruin: ID_Rui = field(default_factory=ID_Rui)
+    ruir: UUI = field(default_factory=UUI)
     tr: TempRef = field(default_factory=TempRef)
 
 """Mapping from tuple id to the corresponding tuple class"""
